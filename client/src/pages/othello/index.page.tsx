@@ -2,12 +2,24 @@ import { useAtom } from 'jotai';
 import { useEffect, useState } from 'react';
 import { userAtom } from 'src/atoms/user';
 import { Loading } from 'src/components/Loading/Loading';
+import { apiClient } from 'src/utils/apiClient';
+import { returnNull } from 'src/utils/returnNull';
 import { BasicHeader } from '../@components/BasicHeader/BasicHeader';
 import styles from './othello.module.css';
 
 const Othello = () => {
   const [user] = useAtom(userAtom);
   const [board, setBoard] = useState<number[][]>();
+
+  const fetchBoard = async () => {
+    const res = await apiClient.rooms.$get().catch(returnNull);
+    if (res === null) {
+      const newRoom = await apiClient.rooms.$post();
+      setBoard(newRoom.board);
+    } else {
+      setBoard(res.board);
+    }
+  };
 
   useEffect(() => {
     setBoard([
@@ -22,9 +34,15 @@ const Othello = () => {
     ]);
   }, []);
 
-  const clickCell = (x: number, y: number) => {
-    return;
+  const clickCell = async (x: number, y: number) => {
+    await apiClient.rooms.board.$post({ body: { x, y } });
+    await fetchBoard();
   };
+
+  useEffect(() => {
+    const canselId = setInterval(fetchBoard, 1000);
+    return () => clearInterval(canselId);
+  }, []);
 
   if (!board || !user) return <Loading visible />;
 
