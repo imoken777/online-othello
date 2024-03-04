@@ -32,7 +32,8 @@ const Room = () => {
   };
 
   const clickCell = async (x: number, y: number) => {
-    await apiClient.rooms.board.$post({ body: { x, y } });
+    if (!room) return;
+    await apiClient.rooms.board.$post({ body: { x, y, roomId: room.id } });
     await fetchRoom();
   };
 

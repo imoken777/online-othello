@@ -1,9 +1,10 @@
+import type { RoomId } from '$../../commonTypesWithClient/ids';
 import type { RoomModel } from '$../../commonTypesWithClient/models';
 import type { DefineMethods } from 'aspida';
 
 export type Methods = DefineMethods<{
   post: {
-    reqBody: { x: number; y: number };
+    reqBody: { x: number; y: number; roomId: RoomId };
     resBody: RoomModel;
   };
 }>;
