@@ -26,7 +26,8 @@ const Room = () => {
   };
 
   const leaveRoom = async () => {
-    const res = await apiClient.rooms.$patch({ body: { roomId } }).catch(returnNull);
+    if (!room) return;
+    const res = await apiClient.rooms.$patch({ body: { roomId: room.id } }).catch(returnNull);
     if (res === null) return;
     router.push('/');
   };
