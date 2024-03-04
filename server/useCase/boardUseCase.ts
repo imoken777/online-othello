@@ -15,7 +15,6 @@ const board: BoardArray = [
 ];
 
 export const boardUseCase = {
-  getBoard: () => board,
   clickBoard: (x: number, y: number, userId: UserId): BoardArray => {
     board[y][x] = userColorUseCase.getUserColor(userId);
     return board;
