@@ -1,4 +1,6 @@
+import type { RoomModel } from 'commonTypesWithClient/models';
 import { useAtom } from 'jotai';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { userAtom } from 'src/atoms/user';
 import { Loading } from 'src/components/Loading/Loading';
@@ -7,42 +9,55 @@ import { returnNull } from 'src/utils/returnNull';
 import { BasicHeader } from '../@components/BasicHeader/BasicHeader';
 import styles from './othello.module.css';
 
-const Othello = () => {
+const Room = () => {
   const [user] = useAtom(userAtom);
-  const [board, setBoard] = useState<number[][]>();
+  const router = useRouter();
+  const { roomId } = router.query;
+  const [room, setRoom] = useState<RoomModel>();
 
-  const fetchBoard = async () => {
+  const fetchRoom = async () => {
     const res = await apiClient.rooms.$get().catch(returnNull);
-    if (res === null) {
-      const newRoom = await apiClient.rooms.$post();
-      setBoard(newRoom.board);
-    } else {
-      setBoard(res.board);
-    }
+    if (!res) return;
+    res.forEach((room) => {
+      if (room.id === roomId) {
+        setRoom(room);
+      }
+    });
   };
 
-  useEffect(() => {
-    fetchBoard();
-  }, []);
+  const leaveRoom = async () => {
+    const res = await apiClient.rooms.$patch({ body: { roomId } }).catch(returnNull);
+    if (res === null) return;
+    router.push('/');
+  };
 
   const clickCell = async (x: number, y: number) => {
     await apiClient.rooms.board.$post({ body: { x, y } });
-    await fetchBoard();
+    await fetchRoom();
   };
 
   useEffect(() => {
-    const canselId = setInterval(fetchBoard, 1000);
-    return () => clearInterval(canselId);
-  }, []);
+    const cancelId = setInterval(fetchRoom, 1000);
+    return () => clearInterval(cancelId);
+  });
 
-  if (!board || !user) return <Loading visible />;
+  if (!room || !user) return <Loading visible />;
 
   return (
     <>
       <BasicHeader user={user} />
+      <h1>部屋{room.id}</h1>
+      <button onClick={leaveRoom}>部屋を出る</button>
+      <div>
+        {room.userOnRooms.map((userOnRoom) =>
+          userOnRoom.out === null ? (
+            <div key={userOnRoom.firebaseId}>{userOnRoom.firebaseId}</div>
+          ) : null
+        )}
+      </div>
       <div className={styles.container}>
         <div className={styles.board}>
-          {board.map((row, y) =>
+          {room.board.map((row, y) =>
             row.map((color, x) => (
               <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
                 {color !== 0 && (
@@ -64,4 +79,4 @@ const Othello = () => {
   );
 };
 
-export default Othello;
+export default Room;
