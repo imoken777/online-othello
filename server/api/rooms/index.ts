@@ -3,7 +3,7 @@ import type { DefineMethods } from 'aspida';
 
 export type Methods = DefineMethods<{
   get: {
-    resBody: RoomModel | null;
+    resBody: RoomModel[];
   };
   post: {
     resBody: RoomModel;
