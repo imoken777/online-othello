@@ -8,6 +8,7 @@ import { apiClient } from 'src/utils/apiClient';
 import { returnNull } from 'src/utils/returnNull';
 import { userAtom } from '../atoms/user';
 import { BasicHeader } from './@components/BasicHeader/BasicHeader';
+import styles from './index.module.css';
 
 const Home = () => {
   const [user] = useAtom(userAtom);
@@ -17,7 +18,8 @@ const Home = () => {
   const fetchRooms = async () => {
     const res = await apiClient.rooms.$get().catch(returnNull);
     if (!res) return;
-    setRooms(res);
+    const waitingRooms = res.filter((room) => room.status === 'waiting');
+    setRooms(waitingRooms);
   };
 
   const createRoom = async () => {
@@ -46,15 +48,23 @@ const Home = () => {
   return (
     <>
       <BasicHeader user={user} />
-      <h1>部屋一覧</h1>
-      <ul>
-        {rooms.map((room, index) => (
-          <li key={room.id} onClick={() => enterTheRoom(room.id)}>
-            {index + 1}番号室{room.status} {room.id}
-          </li>
-        ))}
-      </ul>
-      <button onClick={createRoom}>部屋を作る</button>
+      <div className={styles.roomListContainer}>
+        <h1 className={styles.roomListTitle}>部屋一覧</h1>
+        <ul className={styles.roomList}>
+          {rooms.length === 0 ? (
+            <li className={styles.roomItem}>部屋がありません</li>
+          ) : (
+            rooms.map((room, index) => (
+              <li key={room.id} className={styles.roomItem} onClick={() => enterTheRoom(room.id)}>
+                {index + 1}番目の部屋
+              </li>
+            ))
+          )}
+        </ul>
+        <button className={styles.createRoomButton} onClick={createRoom}>
+          部屋を作る
+        </button>
+      </div>
     </>
   );
 };
