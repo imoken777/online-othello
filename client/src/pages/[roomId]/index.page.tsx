@@ -6,7 +6,6 @@ import { userAtom } from 'src/atoms/user';
 import { Loading } from 'src/components/Loading/Loading';
 import { apiClient } from 'src/utils/apiClient';
 import { returnNull } from 'src/utils/returnNull';
-import { BasicHeader } from '../@components/BasicHeader/BasicHeader';
 import styles from './othello.module.css';
 
 const Room = () => {
@@ -46,35 +45,43 @@ const Room = () => {
 
   return (
     <>
-      <BasicHeader user={user} />
-      <h1>部屋{room.id}</h1>
-      <button onClick={leaveRoom}>部屋を出る</button>
-      <div>
-        {room.userOnRooms.map((userOnRoom) =>
-          userOnRoom.out === null ? (
-            <div key={userOnRoom.firebaseId}>{userOnRoom.firebaseId}</div>
-          ) : null
-        )}
-      </div>
-      <div className={styles.container}>
-        <div className={styles.board}>
-          {room.board.map((row, y) =>
-            row.map((color, x) => (
-              <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
-                {color !== 0 && (
-                  <div
-                    className={styles.stone}
-                    style={{ background: color === 1 ? '#000' : color === 2 ? '#fff' : '#ff0' }}
-                  />
-                )}
+      <div className={styles.gameScreen}>
+        <button onClick={leaveRoom} className={styles.leaveButton}>
+          部屋を出る
+        </button>
+        <div className={styles.gameInfo}>
+          <div className={`${styles.playerInfo} ${styles.playerSelf} ${styles.playerLeft}`}>
+            自分: {user.id}
+          </div>
+          <div className={styles.boardContainer}>
+            <div className={styles.board}>
+              {room.board.map((row, y) =>
+                row.map((color, x) => (
+                  <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
+                    {color !== 0 && (
+                      <div
+                        className={styles.stone}
+                        style={{
+                          background: color === 1 ? '#000' : color === 2 ? '#fff' : '#ff0',
+                        }}
+                      />
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          {room.userOnRooms
+            .filter((userOnRoom) => userOnRoom.out === null && userOnRoom.firebaseId !== user.id)
+            .map((userOnRoom) => (
+              <div
+                key={userOnRoom.firebaseId}
+                className={`${styles.playerInfo} ${styles.playerOpponent} ${styles.playerRight}`}
+              >
+                相手: {userOnRoom.firebaseId}
               </div>
-            ))
-          )}
+            ))}
         </div>
-        {/* <div>{turnColor === 1 ? '黒のターン' : '白のターン'}</div>
-      <div>
-        黒{count_stone(1)} 白{count_stone(2)}
-      </div> */}
       </div>
     </>
   );

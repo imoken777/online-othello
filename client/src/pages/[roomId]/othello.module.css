@@ -141,3 +141,86 @@
   background-color: white;
   border-radius: 50%;
 }
+
+.leaveButton {
+  padding: 10px 20px;
+  margin: 20px 0;
+  margin-bottom: 20px;
+  color: white;
+  cursor: pointer;
+  background-color: #f44336;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.leaveButton:hover {
+  background-color: #d32f2f;
+}
+
+.gameScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gameInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 800px; /* オセロ板の幅に合わせて調整 */
+  margin-bottom: 20px;
+}
+
+.playerInfo {
+  padding: 10px;
+  text-align: center;
+  background-color: #eee;
+  border-radius: 5px;
+}
+
+.playerSelf {
+  color: #4caf50;
+}
+
+.playerOpponent {
+  color: #2196f3;
+}
+
+.boardContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playerLeft {
+  margin-right: 20px;
+}
+
+.playerRight {
+  margin-left: 20px;
+}
+
+.userInfo {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.userSelf,
+.userOpponent {
+  padding: 10px;
+  margin: 0 5px;
+  background-color: #eee;
+  border-radius: 5px;
+}
+
+.userSelf {
+  color: #4caf50;
+}
+
+.userOpponent {
+  color: #2196f3;
+}
