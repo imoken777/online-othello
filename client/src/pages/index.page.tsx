@@ -39,8 +39,8 @@ const Home = () => {
   };
 
   useEffect(() => {
-    const canselId = setInterval(fetchRooms, 1000);
-    return () => clearInterval(canselId);
+    const cancelId = setInterval(fetchRooms, 1000);
+    return () => clearInterval(cancelId);
   }, []);
 
   if (!user) return <Loading visible />;
