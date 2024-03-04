@@ -52,6 +52,39 @@ export const roomRepository = {
     });
     return transaction;
   },
+  update: async (room: RoomModel) => {
+    const transaction = await prismaClient.$transaction(async (prisma) => {
+      const updatedRoom = await prisma.room.update({
+        where: { roomId: room.id },
+        data: {
+          status: room.status,
+        },
+      });
+
+      await Promise.all(
+        room.userOnRooms.map((userOnRoom) =>
+          prisma.userOnRoom.upsert({
+            where: { firebaseId_roomId: { firebaseId: userOnRoom.firebaseId, roomId: room.id } },
+            update: {
+              out:
+                userOnRoom.out !== null && userOnRoom.out !== undefined
+                  ? new Date(userOnRoom.out)
+                  : null,
+            },
+            create: {
+              firebaseId: userOnRoom.firebaseId,
+              in: new Date(userOnRoom.in),
+              out: null,
+              roomId: room.id,
+            },
+          })
+        )
+      );
+
+      return updatedRoom;
+    });
+    return transaction;
+  },
   findLatest: async (): Promise<RoomModel | null> => {
     const room = await prismaClient.room.findFirst({
       orderBy: { createdAt: 'desc' },
