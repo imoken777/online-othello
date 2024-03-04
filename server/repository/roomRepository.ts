@@ -52,7 +52,7 @@ export const roomRepository = {
     });
     return transaction;
   },
-  update: async (room: RoomModel) => {
+  updateRoomData: async (room: RoomModel) => {
     const transaction = await prismaClient.$transaction(async (prisma) => {
       const updatedRoom = await prisma.room.update({
         where: { roomId: room.id },
@@ -84,6 +84,14 @@ export const roomRepository = {
       return updatedRoom;
     });
     return transaction;
+  },
+  updateBoard: async (room: RoomModel): Promise<RoomModel> => {
+    const newRoom = await prismaClient.room.update({
+      where: { roomId: room.id },
+      data: { board: room.board },
+      include: { userOnRooms: true },
+    });
+    return toRoomModel(newRoom);
   },
   findLatest: async (): Promise<RoomModel | null> => {
     const room = await prismaClient.room.findFirst({
