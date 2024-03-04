@@ -1,34 +1,77 @@
+import type { RoomId } from '$/commonTypesWithClient/ids';
 import type { RoomModel } from '$/commonTypesWithClient/models';
 import { roomIdParser } from '$/service/idParsers';
 import { prismaClient } from '$/service/prismaClient';
-import type { Room } from '@prisma/client';
+import type { Room, UserOnRoom } from '@prisma/client';
 import { z } from 'zod';
 
-const toRoomModel = (prismaRoom: Room): RoomModel => {
+const toRoomModel = (prismaRoom: Room & { userOnRooms: UserOnRoom[] }): RoomModel => {
   return {
     id: roomIdParser.parse(prismaRoom.roomId),
     board: z.array(z.array(z.number())).parse(prismaRoom.board),
     status: z.enum(['waiting', 'playing', 'ended']).parse(prismaRoom.status),
     createdAt: prismaRoom.createdAt.getTime(),
+    userOnRooms: prismaRoom.userOnRooms.map((userOnRoom) => ({
+      firebaseId: userOnRoom.firebaseId,
+      in: userOnRoom.in.getTime(),
+      out: userOnRoom.out !== null ? userOnRoom.out.getTime() : null,
+      roomId: roomIdParser.parse(userOnRoom.roomId),
+    })),
   };
 };
 
 export const roomRepository = {
   save: async (room: RoomModel) => {
-    await prismaClient.room.upsert({
-      where: { roomId: room.id },
-      update: { status: room.status, board: room.board },
-      create: {
-        roomId: room.id,
-        board: room.board,
-        status: room.status,
-        createdAt: new Date(room.createdAt),
-      },
+    const transaction = await prismaClient.$transaction(async (prisma) => {
+      const createdRoom = await prisma.room.create({
+        data: {
+          roomId: room.id,
+          board: room.board,
+          status: room.status,
+          createdAt: new Date(room.createdAt),
+        },
+      });
+
+      await Promise.all(
+        room.userOnRooms.map((userOnRoom) =>
+          prisma.userOnRoom.create({
+            data: {
+              firebaseId: userOnRoom.firebaseId,
+              in: new Date(userOnRoom.in),
+              out:
+                userOnRoom.out !== null && userOnRoom.out !== undefined
+                  ? new Date(userOnRoom.out)
+                  : null,
+              roomId: room.id,
+            },
+          })
+        )
+      );
+
+      return createdRoom;
     });
+    return transaction;
   },
   findLatest: async (): Promise<RoomModel | null> => {
     const room = await prismaClient.room.findFirst({
       orderBy: { createdAt: 'desc' },
+      include: { userOnRooms: true },
+    });
+    return room ? toRoomModel(room) : null;
+  },
+  findAll: async (): Promise<RoomModel[]> => {
+    const rooms = await prismaClient.room.findMany({
+      include: { userOnRooms: true },
+    });
+    if (rooms.length === 0) {
+      return [];
+    }
+    return rooms.map(toRoomModel);
+  },
+  findById: async (roomId: RoomId): Promise<RoomModel | null> => {
+    const room = await prismaClient.room.findFirst({
+      where: { roomId },
+      include: { userOnRooms: true },
     });
     return room && toRoomModel(room);
   },

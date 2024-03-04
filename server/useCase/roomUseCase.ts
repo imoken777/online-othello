@@ -1,5 +1,5 @@
 import type { UserId } from '$/commonTypesWithClient/ids';
-import type { RoomModel } from '$/commonTypesWithClient/models';
+import type { RoomModel, userOnRoomModel } from '$/commonTypesWithClient/models';
 import { roomRepository } from '$/repository/roomRepository';
 import { roomIdParser } from '$/service/idParsers';
 import { randomUUID } from 'crypto';
@@ -17,12 +17,22 @@ const initBoard = () => [
 ];
 
 export const roomUseCase = {
-  create: async (): Promise<RoomModel> => {
+  create: async (userId: UserId): Promise<RoomModel> => {
+    const roomId = roomIdParser.parse(randomUUID());
+
+    const userOnRoom: userOnRoomModel = {
+      firebaseId: userId,
+      in: Date.now(),
+      out: null,
+      roomId,
+    };
+
     const newRoom: RoomModel = {
-      id: roomIdParser.parse(randomUUID()),
+      id: roomId,
       board: initBoard(),
       status: 'waiting',
       createdAt: Date.now(),
+      userOnRooms: [userOnRoom],
     };
     await roomRepository.save(newRoom);
 

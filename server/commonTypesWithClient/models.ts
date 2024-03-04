@@ -9,11 +9,19 @@ export type UserModel = {
   photoURL: string | undefined;
 };
 
+export type userOnRoomModel = {
+  firebaseId: string;
+  in: number;
+  out?: number | null;
+  roomId: RoomId;
+};
+
 export type RoomModel = {
   id: RoomId;
   board: number[][];
   status: 'waiting' | 'playing' | 'ended';
   createdAt: number;
+  userOnRooms: userOnRoomModel[];
 };
 
 export const taskParser = z.object({
