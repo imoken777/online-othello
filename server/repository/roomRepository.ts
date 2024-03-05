@@ -11,6 +11,7 @@ const toRoomModel = (prismaRoom: Room & { userOnRooms: UserOnRoom[] }): RoomMode
     board: z.array(z.array(z.number())).parse(prismaRoom.board),
     status: z.enum(['waiting', 'playing', 'ended']).parse(prismaRoom.status),
     createdAt: prismaRoom.createdAt.getTime(),
+    currentTurn: prismaRoom.currentTurn,
     userOnRooms: prismaRoom.userOnRooms.map((userOnRoom) => ({
       firebaseId: userOnRoom.firebaseId,
       in: userOnRoom.in.getTime(),
@@ -29,6 +30,7 @@ export const roomRepository = {
           board: room.board,
           status: room.status,
           createdAt: new Date(room.createdAt),
+          currentTurn: room.currentTurn,
         },
       });
 
@@ -88,7 +90,7 @@ export const roomRepository = {
   updateBoard: async (room: RoomModel): Promise<RoomModel> => {
     const newRoom = await prismaClient.room.update({
       where: { roomId: room.id },
-      data: { board: room.board },
+      data: { board: room.board, currentTurn: room.currentTurn },
       include: { userOnRooms: true },
     });
     return toRoomModel(newRoom);

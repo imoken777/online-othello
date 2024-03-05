@@ -21,6 +21,7 @@ export type RoomModel = {
   board: number[][];
   status: 'waiting' | 'playing' | 'ended';
   createdAt: number;
+  currentTurn: number;
   userOnRooms: userOnRoomModel[];
 };
 

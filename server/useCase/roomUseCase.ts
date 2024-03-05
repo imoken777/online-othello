@@ -31,6 +31,7 @@ export const roomUseCase = {
       board: initBoard(),
       status: 'waiting',
       createdAt: Date.now(),
+      currentTurn: 1, //黒
       userOnRooms: [userOnRoom],
     };
     await roomRepository.save(newRoom);
