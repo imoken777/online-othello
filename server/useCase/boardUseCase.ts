@@ -42,4 +42,16 @@ export const boardUseCase = {
     await roomRepository.updateBoard(newRoom);
     return newRoom;
   },
+  canPlaceAllStones: async (roomId: RoomId, turnColor: number): Promise<number[][]> => {
+    const room = await roomRepository.findById(roomId);
+    if (room === null) {
+      throw new Error('no room');
+    }
+    const newBoard: number[][] = room.board.map((row, y) =>
+      row.map((cell, x) => {
+        return cell === 0 && canPlaceStone(x, y, room.board, turnColor) ? -1 : cell;
+      })
+    );
+    return newBoard;
+  },
 };
