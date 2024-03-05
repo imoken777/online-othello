@@ -20,6 +20,9 @@ export const boardUseCase = {
     if (!room) {
       throw new Error('no room');
     }
+    if (room.status !== 'playing') {
+      return room;
+    }
     const turnColor = userColorUseCase.getUserColor(userId, room);
     if (room.currentTurn !== turnColor) return room;
 
