@@ -1,3 +1,4 @@
+import type { UserId } from 'commonTypesWithClient/ids';
 import type { RoomModel } from 'commonTypesWithClient/models';
 import { useAtom } from 'jotai';
 import { useRouter } from 'next/router';
@@ -13,15 +14,25 @@ const Room = () => {
   const router = useRouter();
   const { roomId } = router.query;
   const [room, setRoom] = useState<RoomModel>();
+  const [placeableMatrix, setPlaceableMatrix] = useState<number[][]>([[]]);
 
-  const fetchRoom = async () => {
-    const res = await apiClient.rooms.$get().catch(returnNull);
-    if (!res) return;
-    res.forEach((room) => {
-      if (room.id === roomId) {
+  const fetchRoomData = async () => {
+    const resRooms = await apiClient.rooms.$get().catch(returnNull);
+    if (!resRooms) return;
+
+    const room = resRooms.find((room) => room.id === roomId);
+    if (room) {
+      const resMatrix = await apiClient.rooms.board
+        .$get({
+          query: { roomId: room.id, turnColor: room.currentTurn },
+        })
+        .catch(returnNull);
+      console.table(resMatrix);
+      if (resMatrix !== null) {
+        setPlaceableMatrix(resMatrix);
         setRoom(room);
       }
-    });
+    }
   };
 
   const leaveRoom = async () => {
@@ -34,11 +45,23 @@ const Room = () => {
   const clickCell = async (x: number, y: number) => {
     if (!room) return;
     await apiClient.rooms.board.$post({ body: { x, y, roomId: room.id } });
-    await fetchRoom();
+    await fetchRoomData();
+  };
+
+  const judgeColor = (userId: UserId | string): number => {
+    const sortedActiveUsers = room?.userOnRooms
+      .filter((userOnRoom) => userOnRoom.out === null)
+      .sort((a, b) => a.in - b.in);
+
+    const userIndex = sortedActiveUsers?.findIndex(
+      (userOnRoom) => userOnRoom.firebaseId === userId
+    );
+    const userColor = userIndex === 0 ? 1 : 2;
+    return userColor;
   };
 
   useEffect(() => {
-    const cancelId = setInterval(fetchRoom, 1000);
+    const cancelId = setInterval(fetchRoomData, 1000);
     return () => clearInterval(cancelId);
   });
 
@@ -50,20 +73,21 @@ const Room = () => {
         <button onClick={leaveRoom} className={styles.leaveButton}>
           部屋を出る
         </button>
+        <p>現在は{room.currentTurn === 1 ? '黒' : '白'}のターン</p>
         <div className={styles.gameInfo}>
           <div className={`${styles.playerInfo} ${styles.playerSelf} ${styles.playerLeft}`}>
-            自分: {user.id}
+            あなたは{judgeColor(user.id) === 1 ? '黒' : '白'}です
           </div>
           <div className={styles.boardContainer}>
             <div className={styles.board}>
-              {room.board.map((row, y) =>
+              {placeableMatrix.map((row, y) =>
                 row.map((color, x) => (
                   <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
                     {color !== 0 && (
                       <div
-                        className={styles.stone}
+                        className={`${styles.stone} ${color === -1 ? styles.placeable : ''}`}
                         style={{
-                          background: color === 1 ? '#000' : color === 2 ? '#fff' : '#ff0',
+                          background: color === 1 ? '#000' : color === 2 ? '#fff' : '',
                         }}
                       />
                     )}
@@ -79,7 +103,7 @@ const Room = () => {
                 key={userOnRoom.firebaseId}
                 className={`${styles.playerInfo} ${styles.playerOpponent} ${styles.playerRight}`}
               >
-                相手: {userOnRoom.firebaseId}
+                相手は{judgeColor(userOnRoom.firebaseId) === 1 ? '黒' : '白'}です
               </div>
             ))}
         </div>
