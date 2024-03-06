@@ -50,7 +50,7 @@ export const roomUseCase = {
     );
     let newRoom: RoomModel;
 
-    if (existingUserIndex === -1) {
+    if (existingUserIndex === -1 && room.status === 'waiting') {
       //ユーザーが入っていない場合は入室させる
       const userOnRoom: userOnRoomModel = {
         firebaseId: userId,

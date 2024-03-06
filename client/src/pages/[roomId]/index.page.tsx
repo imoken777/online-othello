@@ -27,7 +27,6 @@ const Room = () => {
           query: { roomId: room.id, turnColor: room.currentTurn },
         })
         .catch(returnNull);
-      console.table(resMatrix);
       if (resMatrix !== null) {
         setPlaceableMatrix(resMatrix);
         setRoom(room);
@@ -39,7 +38,7 @@ const Room = () => {
     if (!room) return;
     const res = await apiClient.rooms.$patch({ body: { roomId: room.id } }).catch(returnNull);
     if (res === null) return;
-    router.push('/');
+    await router.push('/');
   };
 
   const clickCell = async (x: number, y: number) => {
@@ -60,7 +59,18 @@ const Room = () => {
     return userColor;
   };
 
+  const handleOpponentLeave = () => {
+    if (!room) return;
+    alert('対戦相手が部屋を出たため、対局が終了しました');
+    leaveRoom();
+  };
+
   useEffect(() => {
+    if (room?.status === 'ended') {
+      handleOpponentLeave();
+      return;
+    }
+
     const cancelId = setInterval(fetchRoomData, 1000);
     return () => clearInterval(cancelId);
   });

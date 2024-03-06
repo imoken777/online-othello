@@ -18,6 +18,7 @@ const Home = () => {
   const fetchRooms = async () => {
     const res = await apiClient.rooms.$get().catch(returnNull);
     if (!res) return;
+    checkActiveRoom(res);
     const waitingRooms = res.filter((room) => room.status === 'waiting');
     setRooms(waitingRooms);
   };
@@ -38,19 +39,34 @@ const Home = () => {
     router.push(`/${res.id}`);
   };
 
-  const checkActiveRoom = useCallback(async () => {
-    console.log('checkActiveRoom');
-    const res = await apiClient.rooms.connect.$get().catch(returnNull);
-    if (res === null) return;
-    router.push(`/${res.id}`);
-  }, [router]);
+  //プレイ中の部屋があるかチェックする関数
+  const checkActiveRoom = useCallback(
+    async (allRooms: RoomModel[]) => {
+      if (!user?.id) return;
+
+      const activeRoom = allRooms.find((room) =>
+        room.userOnRooms.some(
+          (userOnRoom) => userOnRoom.firebaseId === user.id && userOnRoom.out === null
+        )
+      );
+
+      if (!activeRoom || activeRoom.status === 'ended') return;
+
+      const confirmReconnect = window.confirm('プレイ中のゲームがあります。再接続しますか？');
+      if (confirmReconnect) {
+        router.push(`/${activeRoom.id}`);
+      } else {
+        //退出処理
+        await apiClient.rooms.$patch({ body: { roomId: activeRoom.id } });
+      }
+    },
+    [router, user?.id]
+  );
 
   useEffect(() => {
-    checkActiveRoom();
-
     const cancelId = setInterval(fetchRooms, 1000);
     return () => clearInterval(cancelId);
-  }, [checkActiveRoom]);
+  });
 
   if (!user) return <Loading visible />;
 
