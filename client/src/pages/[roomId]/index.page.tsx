@@ -65,6 +65,15 @@ const Room = () => {
     leaveRoom();
   };
 
+  const defineCellStyle = (color: number) => {
+    if (!room || !user) return;
+    return color === -1
+      ? room.currentTurn === judgeColor(user.id)
+        ? `${styles.stone} ${styles.placeable}`
+        : ''
+      : styles.stone;
+  };
+
   useEffect(() => {
     if (room?.status === 'ended') {
       handleOpponentLeave();
@@ -95,7 +104,7 @@ const Room = () => {
                   <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
                     {color !== 0 && (
                       <div
-                        className={`${styles.stone} ${color === -1 ? styles.placeable : ''}`}
+                        className={`${defineCellStyle(color)}`}
                         style={{
                           background: color === 1 ? '#000' : color === 2 ? '#fff' : '',
                         }}
