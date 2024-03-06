@@ -43,7 +43,8 @@ const Room = () => {
 
   const clickCell = async (x: number, y: number) => {
     if (!room) return;
-    await apiClient.rooms.board.$post({ body: { x, y, roomId: room.id } });
+    const isFlipStone = await apiClient.rooms.board.$post({ body: { x, y, roomId: room.id } });
+    if (!isFlipStone) return;
     await fetchRoomData();
   };
 
@@ -65,6 +66,14 @@ const Room = () => {
     leaveRoom();
   };
 
+  const handleGameEnd = () => {
+    if (!room) return;
+    if (!user) return;
+    const winner = judgeColor(user.id) === room.winner ? 'あなた' : '相手';
+    alert(`${winner}の勝ちです`);
+    leaveRoom();
+  };
+
   const defineCellStyle = (color: number) => {
     if (!room || !user) return;
     return color === -1
@@ -75,6 +84,10 @@ const Room = () => {
   };
 
   useEffect(() => {
+    if (room?.winner === 1 || room?.winner === 2) {
+      handleGameEnd();
+      return;
+    }
     if (room?.status === 'ended') {
       handleOpponentLeave();
       return;
