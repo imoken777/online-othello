@@ -1,4 +1,4 @@
-import type { RoomId, UserId } from '$/commonTypesWithClient/ids';
+import type { RoomId } from '$/commonTypesWithClient/ids';
 import type { RoomModel } from '$/commonTypesWithClient/models';
 import { roomIdParser } from '$/service/idParsers';
 import { prismaClient } from '$/service/prismaClient';
@@ -117,21 +117,5 @@ export const roomRepository = {
       include: { userOnRooms: true },
     });
     return room && toRoomModel(room);
-  },
-  findActiveRooms: async (userId: UserId): Promise<RoomModel | null> => {
-    const room = await prismaClient.room.findFirst({
-      where: {
-        userOnRooms: {
-          some: {
-            firebaseId: userId,
-            out: null,
-          },
-        },
-      },
-      include: { userOnRooms: true },
-    });
-    if (!room) return null;
-
-    return toRoomModel(room);
   },
 };
