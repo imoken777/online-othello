@@ -103,3 +103,25 @@ export const flipStonesInDirection = (
   }
   return board;
 };
+
+//ゲームエンドを判定する関数
+export const isGameEnd = (board: number[][]): boolean => {
+  const isBoardFull = !board.some((row) => row.includes(0));
+  const isBlackNoPlaceable = !board.some((row, y) =>
+    row.some((_, x) => canPlaceStone(x, y, board, 1))
+  );
+  const isWhiteNoPlaceable = !board.some((row, y) =>
+    row.some((_, x) => canPlaceStone(x, y, board, 2))
+  );
+  return isBoardFull || (isBlackNoPlaceable && isWhiteNoPlaceable);
+};
+
+//ゲームの勝者を判定する関数
+export const judgeWinner = (board: number[][]): number => {
+  const blackCount = board.flat().filter((stone) => stone === 1).length;
+  const whiteCount = board.flat().filter((stone) => stone === 2).length;
+  if (blackCount === whiteCount) {
+    return 0;
+  }
+  return blackCount > whiteCount ? 1 : 2;
+};

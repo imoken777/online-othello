@@ -8,8 +8,8 @@ const initBoard = () => [
   [0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 1, 2, 0, 0, 0],
   [0, 0, 0, 2, 1, 0, 0, 0],
+  [0, 0, 0, 1, 2, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0],
@@ -68,7 +68,7 @@ export const roomUseCase = {
       newRoom = { ...room, status: 'ended', userOnRooms: newUsers };
     }
 
-    await roomRepository.updateRoomData(newRoom);
+    await roomRepository.updateRoomStatusAndUserStatus(newRoom);
 
     return newRoom;
   },
