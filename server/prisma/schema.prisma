@@ -21,6 +21,7 @@ model Room {
   status      String
   createdAt   DateTime
   currentTurn Int
+  winner      Int?
   userOnRooms UserOnRoom[]
 }
 

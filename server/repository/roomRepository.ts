@@ -12,6 +12,7 @@ const toRoomModel = (prismaRoom: Room & { userOnRooms: UserOnRoom[] }): RoomMode
     status: z.enum(['waiting', 'playing', 'ended']).parse(prismaRoom.status),
     createdAt: prismaRoom.createdAt.getTime(),
     currentTurn: prismaRoom.currentTurn,
+    winner: prismaRoom.winner ?? undefined,
     userOnRooms: prismaRoom.userOnRooms.map((userOnRoom) => ({
       firebaseId: userOnRoom.firebaseId,
       in: userOnRoom.in.getTime(),
@@ -54,7 +55,7 @@ export const roomRepository = {
     });
     return transaction;
   },
-  updateRoomData: async (room: RoomModel) => {
+  updateRoomStatusAndUserStatus: async (room: RoomModel) => {
     const transaction = await prismaClient.$transaction(async (prisma) => {
       const updatedRoom = await prisma.room.update({
         where: { roomId: room.id },
@@ -86,6 +87,14 @@ export const roomRepository = {
       return updatedRoom;
     });
     return transaction;
+  },
+  finalizeGame: async (room: RoomModel) => {
+    const newRoom = await prismaClient.room.update({
+      where: { roomId: room.id },
+      data: { status: room.status, winner: room.winner },
+      include: { userOnRooms: true },
+    });
+    return toRoomModel(newRoom);
   },
   updateBoard: async (room: RoomModel): Promise<RoomModel> => {
     const newRoom = await prismaClient.room.update({

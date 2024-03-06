@@ -22,6 +22,7 @@ export type RoomModel = {
   status: 'waiting' | 'playing' | 'ended';
   createdAt: number;
   currentTurn: number;
+  winner?: number;
   userOnRooms: userOnRoomModel[];
 };
 
