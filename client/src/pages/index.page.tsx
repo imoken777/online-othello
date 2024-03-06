@@ -2,7 +2,7 @@ import type { RoomId } from 'commonTypesWithClient/ids';
 import type { RoomModel } from 'commonTypesWithClient/models';
 import { useAtom } from 'jotai';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Loading } from 'src/components/Loading/Loading';
 import { apiClient } from 'src/utils/apiClient';
 import { returnNull } from 'src/utils/returnNull';
@@ -38,10 +38,19 @@ const Home = () => {
     router.push(`/${res.id}`);
   };
 
+  const checkActiveRoom = useCallback(async () => {
+    console.log('checkActiveRoom');
+    const res = await apiClient.rooms.connect.$get().catch(returnNull);
+    if (res === null) return;
+    router.push(`/${res.id}`);
+  }, [router]);
+
   useEffect(() => {
+    checkActiveRoom();
+
     const cancelId = setInterval(fetchRooms, 1000);
     return () => clearInterval(cancelId);
-  }, []);
+  }, [checkActiveRoom]);
 
   if (!user) return <Loading visible />;
 
