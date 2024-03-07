@@ -127,4 +127,11 @@ export const roomRepository = {
     });
     return room && toRoomModel(room);
   },
+  deleteByIdWithUserOnRooms: async (roomId: RoomId) => {
+    await prismaClient.$transaction(async (prisma) => {
+      await prisma.userOnRoom.deleteMany({ where: { roomId } });
+      await prisma.room.delete({ where: { roomId } });
+    });
+    return;
+  },
 };
