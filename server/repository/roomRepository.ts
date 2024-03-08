@@ -31,7 +31,7 @@ const isOlderThanTwoMinutes = (createdAt: Date) => {
 };
 
 export const roomRepository = {
-  save: async (room: RoomModel) => {
+  createAndSaveRoom: async (room: RoomModel) => {
     const transaction = await prismaClient.$transaction(async (prisma) => {
       const createdRoom = await prisma.room.create({
         data: {
@@ -112,7 +112,7 @@ export const roomRepository = {
     });
     return toRoomModel(newRoom);
   },
-  findAll: async (): Promise<RoomModel[]> => {
+  getAllRooms: async (): Promise<RoomModel[]> => {
     const rooms = await prismaClient.room.findMany({
       include: { userOnRooms: true },
     });
@@ -131,7 +131,7 @@ export const roomRepository = {
     }
     return filteredRooms.map(toRoomModel);
   },
-  findById: async (roomId: RoomId): Promise<RoomModel | null> => {
+  getRoomById: async (roomId: RoomId): Promise<RoomModel | null> => {
     const room = await prismaClient.room.findFirst({
       where: { roomId },
       include: { userOnRooms: true },

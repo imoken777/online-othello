@@ -1,3 +1,14 @@
+export const directionOffsets = [
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1],
+];
+
 // 盤面上の指定位置が有効か判断する関数
 const isOnBoard = (x: number, y: number, board: number[][]): boolean => {
   return x >= 0 && x < board[0].length && y >= 0 && y < board.length;
@@ -41,18 +52,7 @@ export const canPlaceStone = (
     return false;
   }
 
-  const directions = [
-    [-1, -1],
-    [-1, 0],
-    [-1, 1],
-    [0, -1],
-    [0, 1],
-    [1, -1],
-    [1, 0],
-    [1, 1],
-  ];
-
-  return directions.some(([dx, dy]) => canFlipInDirection(x, y, dx, dy, board, turnColor));
+  return directionOffsets.some(([dx, dy]) => canFlipInDirection(x, y, dx, dy, board, turnColor));
 };
 
 // 盤面上の指定位置が相手の石かどうかを判断する関数

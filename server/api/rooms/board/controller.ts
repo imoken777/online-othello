@@ -4,7 +4,7 @@ import { defineController } from './$relay';
 export default defineController(() => ({
   get: async ({ query }) => ({
     status: 200,
-    body: await boardUseCase.canPlaceAllStones(query.roomId, query.turnColor),
+    body: await boardUseCase.checkPlacableStones(query.roomId, query.turnColor),
   }),
   post: async ({ body, user }) => ({
     status: 201,

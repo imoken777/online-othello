@@ -4,22 +4,12 @@ import { roomRepository } from '$/repository/roomRepository';
 import {
   canFlipInDirection,
   canPlaceStone,
+  directionOffsets,
   flipStonesInDirection,
   isGameEnd,
   judgeWinner,
 } from '$/service/othelloLogics';
 import { userColorUseCase } from './userColorUseCase';
-
-const directions = [
-  [-1, -1],
-  [-1, 0],
-  [-1, 1],
-  [0, -1],
-  [0, 1],
-  [1, -1],
-  [1, 0],
-  [1, 1],
-];
 
 const handleGameEnd = (board: number[][], room: RoomModel): RoomModel | null => {
   if (isGameEnd(board)) {
@@ -32,7 +22,7 @@ const handleGameEnd = (board: number[][], room: RoomModel): RoomModel | null => 
 export const boardUseCase = {
   //eslint-disable-next-line complexity
   clickBoard: async (x: number, y: number, userId: UserId, roomId: RoomId): Promise<boolean> => {
-    const room = await roomRepository.findById(roomId);
+    const room = await roomRepository.getRoomById(roomId);
     if (!room || room.status !== 'playing') return false;
 
     //自分のターンかどうか判定
@@ -47,7 +37,7 @@ export const boardUseCase = {
 
     newBoard[y][x] = turnColor;
 
-    directions.forEach(([dx, dy]) => {
+    directionOffsets.forEach(([dx, dy]) => {
       if (canFlipInDirection(x, y, dx, dy, newBoard, turnColor)) {
         flipStonesInDirection(x, y, dx, dy, newBoard, turnColor);
       }
@@ -65,8 +55,8 @@ export const boardUseCase = {
     }
     return true;
   },
-  canPlaceAllStones: async (roomId: RoomId, turnColor: number): Promise<number[][]> => {
-    const room = await roomRepository.findById(roomId);
+  checkPlacableStones: async (roomId: RoomId, turnColor: number): Promise<number[][]> => {
+    const room = await roomRepository.getRoomById(roomId);
     if (room === null) {
       throw new Error('no room');
     }

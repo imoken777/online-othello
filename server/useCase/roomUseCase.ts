@@ -16,7 +16,7 @@ const initBoard = () => [
 ];
 
 export const roomUseCase = {
-  create: async (userId: UserId): Promise<RoomModel> => {
+  createRoom: async (userId: UserId): Promise<RoomModel> => {
     const roomId = roomIdParser.parse(randomUUID());
 
     const userOnRoom: userOnRoomModel = {
@@ -34,12 +34,12 @@ export const roomUseCase = {
       currentTurn: 1, //黒
       userOnRooms: [userOnRoom],
     };
-    await roomRepository.save(newRoom);
+    await roomRepository.createAndSaveRoom(newRoom);
 
     return newRoom;
   },
-  updateUserInRoom: async (roomId: RoomId, userId: UserId): Promise<RoomModel> => {
-    const room = await roomRepository.findById(roomId);
+  toggleUserInRoom: async (roomId: RoomId, userId: UserId): Promise<RoomModel> => {
+    const room = await roomRepository.getRoomById(roomId);
     if (!room) {
       throw new Error('no room');
     }
