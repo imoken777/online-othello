@@ -1,4 +1,4 @@
-import type { RoomId } from '$../../commonTypesWithClient/ids';
+import type { RoomId } from '$/commonTypesWithClient/ids';
 import type { DefineMethods } from 'aspida';
 
 export type Methods = DefineMethods<{
