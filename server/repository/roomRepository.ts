@@ -22,6 +22,14 @@ const toRoomModel = (prismaRoom: Room & { userOnRooms: UserOnRoom[] }): RoomMode
   };
 };
 
+const isOlderThanTwoMinutes = (createdAt: Date) => {
+  const twoMinutesInMilliseconds = 2 * 60 * 1000;
+  const createdAtDate = new Date(createdAt);
+  const now = new Date();
+  const difference = now.getTime() - createdAtDate.getTime();
+  return difference > twoMinutesInMilliseconds;
+};
+
 export const roomRepository = {
   save: async (room: RoomModel) => {
     const transaction = await prismaClient.$transaction(async (prisma) => {
@@ -104,13 +112,6 @@ export const roomRepository = {
     });
     return toRoomModel(newRoom);
   },
-  findLatest: async (): Promise<RoomModel | null> => {
-    const room = await prismaClient.room.findFirst({
-      orderBy: { createdAt: 'desc' },
-      include: { userOnRooms: true },
-    });
-    return room ? toRoomModel(room) : null;
-  },
   findAll: async (): Promise<RoomModel[]> => {
     const rooms = await prismaClient.room.findMany({
       include: { userOnRooms: true },
@@ -118,7 +119,17 @@ export const roomRepository = {
     if (rooms.length === 0) {
       return [];
     }
-    return rooms.map(toRoomModel);
+
+    //不要な部屋を削除
+    const filteredRooms = [];
+    for (const room of rooms) {
+      if (room.status === 'ended' && isOlderThanTwoMinutes(room.createdAt)) {
+        await roomRepository.deleteRoomWithUserOnRooms(room.roomId);
+      } else {
+        filteredRooms.push(room);
+      }
+    }
+    return filteredRooms.map(toRoomModel);
   },
   findById: async (roomId: RoomId): Promise<RoomModel | null> => {
     const room = await prismaClient.room.findFirst({
@@ -127,7 +138,7 @@ export const roomRepository = {
     });
     return room && toRoomModel(room);
   },
-  deleteByIdWithUserOnRooms: async (roomId: RoomId) => {
+  deleteRoomWithUserOnRooms: async (roomId: string) => {
     await prismaClient.$transaction(async (prisma) => {
       await prisma.userOnRoom.deleteMany({ where: { roomId } });
       await prisma.room.delete({ where: { roomId } });
