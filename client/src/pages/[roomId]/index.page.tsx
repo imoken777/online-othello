@@ -23,7 +23,7 @@ const OthelloRoom = () => {
     return () => clearInterval(cancelId);
   });
 
-  if (!room || !user) return <Loading visible />;
+  if (room === undefined || !user) return <Loading visible />;
 
   const myColor = judgeColor(user.id, room);
 
@@ -58,16 +58,24 @@ const OthelloRoom = () => {
       : styles.stone;
   };
 
+  const convertColorToString = (color: number) => {
+    return color === 1 ? '黒' : '白';
+  };
+
   return (
     <>
       <div className={styles.gameScreen}>
         <button onClick={leaveRoom} className={styles.leaveButton}>
           部屋を出る
         </button>
-        <p>現在は{room.currentTurn === 1 ? '黒' : '白'}のターン</p>
+        {room.status === 'waiting' ? (
+          <p>対戦相手を待っています</p>
+        ) : (
+          <p>現在は{convertColorToString(room.currentTurn)}のターン</p>
+        )}
         <div className={styles.gameInfo}>
           <div className={`${styles.playerInfo} ${styles.playerSelf} ${styles.playerLeft}`}>
-            あなたは{myColor === 1 ? '黒' : '白'}です
+            あなたは{convertColorToString(myColor)}です
           </div>
           <div className={styles.boardContainer}>
             <div className={styles.board}>
@@ -94,7 +102,7 @@ const OthelloRoom = () => {
                 key={userOnRoom.firebaseId}
                 className={`${styles.playerInfo} ${styles.playerOpponent} ${styles.playerRight}`}
               >
-                相手は{judgeColor(userOnRoom.firebaseId, room) === 1 ? '黒' : '白'}です
+                相手は{convertColorToString(judgeColor(userOnRoom.firebaseId, room))}です
               </div>
             ))}
         </div>
