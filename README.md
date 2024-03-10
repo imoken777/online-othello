@@ -1,8 +1,12 @@
-# Next frourio starter
+# Online-Othello
 
-フロントエンドは client ディレクトリの [Next.js](https://nextjs.org/) 、バックエンドは server ディレクトリの [frourio](https://frourio.com/) で構築された TypeScript で一気通貫開発が可能なモノレポサービス
+このプロジェクトは、フロントエンドは client ディレクトリの [Next.js](https://nextjs.org/) 、バックエンドは server ディレクトリの [frourio](https://frourio.com/) で構築された TypeScript で一気通貫開発されたオンラインリアルタイムオセロです。
 
-最新のコミットによるデモ - https://solufa.github.io/next-frourio-starter/
+## 機能
+
+- ユーザー登録、ログイン、ログアウト
+- リアルタイムオセロ対戦
+- 複数の部屋
 
 ## 開発手順
 
