@@ -7,6 +7,7 @@ import {
   directionOffsets,
   flipStonesInDirection,
   isGameEnd,
+  isNoAvailableMoves,
   judgeWinner,
 } from '$/service/othelloLogics';
 import { userColorUseCase } from './userColorUseCase';
@@ -51,6 +52,10 @@ export const boardUseCase = {
       await roomRepository.finalizeGame(gameEndResult);
     } else {
       //ゲーム続行
+      const isPass = isNoAvailableMoves(newRoom.board, newRoom.currentTurn);
+      if (isPass) {
+        newRoom.currentTurn = 3 - newRoom.currentTurn;
+      }
       await roomRepository.updateBoard(newRoom);
     }
     return true;

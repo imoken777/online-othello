@@ -107,12 +107,8 @@ export const flipStonesInDirection = (
 //ゲームエンドを判定する関数
 export const isGameEnd = (board: number[][]): boolean => {
   const isBoardFull = !board.some((row) => row.includes(0));
-  const isBlackNoPlaceable = !board.some((row, y) =>
-    row.some((_, x) => canPlaceStone(x, y, board, 1))
-  );
-  const isWhiteNoPlaceable = !board.some((row, y) =>
-    row.some((_, x) => canPlaceStone(x, y, board, 2))
-  );
+  const isBlackNoPlaceable = isNoAvailableMoves(board, 1);
+  const isWhiteNoPlaceable = isNoAvailableMoves(board, 2);
   return isBoardFull || (isBlackNoPlaceable && isWhiteNoPlaceable);
 };
 
@@ -124,4 +120,8 @@ export const judgeWinner = (board: number[][]): number => {
     return 0;
   }
   return blackCount > whiteCount ? 1 : 2;
+};
+
+export const isNoAvailableMoves = (board: number[][], turnColor: number): boolean => {
+  return !board.some((row, y) => row.some((_, x) => canPlaceStone(x, y, board, turnColor)));
 };
