@@ -1,12 +1,12 @@
-import { GithubAuthProvider, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
 import { createAuth } from 'src/utils/firebase';
 import { returnNull } from './returnNull';
 
-export const loginWithGitHub = async () => {
-  const ghProvider = new GithubAuthProvider();
-  ghProvider.addScope('read:user');
+export const loginWithGoogle = async () => {
+  const googleAuthProvider = new GoogleAuthProvider();
+  googleAuthProvider.addScope('profile');
 
-  await signInWithPopup(createAuth(), ghProvider).catch(returnNull);
+  await signInWithRedirect(createAuth(), googleAuthProvider).catch(returnNull);
 };
 
 export const logout = async () => {
