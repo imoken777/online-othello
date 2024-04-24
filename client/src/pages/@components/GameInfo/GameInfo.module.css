@@ -1,0 +1,27 @@
+.stone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 65px;
+  height: 65px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.gameInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 640px;
+  margin: 10px 0;
+  background-color: #65ee65;
+  border-radius: 5px;
+}
+
+.playerInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}

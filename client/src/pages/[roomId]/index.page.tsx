@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { Loading } from 'src/components/Loading/Loading';
 import { apiClient } from 'src/utils/apiClient';
 import { returnNull } from 'src/utils/returnNull';
-import { judgeColor } from 'src/utils/userColor';
+import { convertToBlackOrWhite, judgeColor } from 'src/utils/userColor';
+import GameInfo from '../@components/GameInfo/GameInfo';
 import { useRoomData } from '../@hooks/useRoomData';
 import styles from './index.module.css';
 
@@ -45,8 +46,7 @@ const OthelloRoom = () => {
   };
 
   const handleGameEnd = () => {
-    if (room.winner === undefined) return;
-    const winner = convertColorToString(room.winner);
+    const winner = room.winner === myColor ? 'あなた' : '相手';
     alert(`${winner}の勝ちです`);
     leaveRoom();
   };
@@ -59,76 +59,31 @@ const OthelloRoom = () => {
       : styles.stone;
   };
 
-  const convertColorToString = (color: number) => {
-    return color === myColor ? 'あなた' : '相手';
-  };
-
-  const convertToBlackOrWhite = (color: number) => {
-    return color === 1 ? '#000' : color === 2 ? '#fff' : '';
-  };
-
-  const countStone = (color: number) => {
-    return room.board.flat().filter((c) => c === color).length;
-  };
-
   return (
-    <>
-      <div className={styles.gameScreen}>
-        <div className={styles.gameInfo}>
-          <div className={styles.playerInfo}>
-            あなた
-            <div
-              className={styles.stone}
-              style={{
-                background: convertToBlackOrWhite(myColor),
-                color: convertToBlackOrWhite(2 / myColor),
-              }}
-            >
-              {countStone(myColor)}
-            </div>
-          </div>
-
-          {room.status === 'waiting' ? (
-            <p>対戦相手を待っています</p>
-          ) : (
-            <p>{convertColorToString(room.currentTurn)}のターン</p>
+    <div className={styles.gameScreen}>
+      {GameInfo({ myColor, room })}
+      <div className={styles.boardContainer}>
+        <div className={styles.board}>
+          {placeableMatrix.map((row, y) =>
+            row.map((color, x) => (
+              <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
+                {color !== 0 && (
+                  <div
+                    className={`${defineCellStyle(color)}`}
+                    style={{
+                      background: convertToBlackOrWhite(color),
+                    }}
+                  />
+                )}
+              </div>
+            ))
           )}
-          <div className={styles.playerInfo}>
-            相手
-            <div
-              className={styles.stone}
-              style={{
-                background: convertToBlackOrWhite(2 / myColor),
-                color: convertToBlackOrWhite(myColor),
-              }}
-            >
-              {countStone(2 / myColor)}
-            </div>
-          </div>
         </div>
-        <div className={styles.boardContainer}>
-          <div className={styles.board}>
-            {placeableMatrix.map((row, y) =>
-              row.map((color, x) => (
-                <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
-                  {color !== 0 && (
-                    <div
-                      className={`${defineCellStyle(color)}`}
-                      style={{
-                        background: convertToBlackOrWhite(color),
-                      }}
-                    />
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-        <button onClick={leaveRoom} className={styles.leaveButton}>
-          部屋を出る
-        </button>
       </div>
-    </>
+      <button onClick={leaveRoom} className={styles.leaveButton}>
+        部屋を出る
+      </button>
+    </div>
   );
 };
 

@@ -10,3 +10,7 @@ export const judgeColor = (userId: UserId | string, room: RoomModel): number => 
   const userColor = userIndex === 0 ? 1 : 2;
   return userColor;
 };
+
+export const convertToBlackOrWhite = (color: number) => {
+  return color === 1 ? '#000' : color === 2 ? '#fff' : '';
+};
