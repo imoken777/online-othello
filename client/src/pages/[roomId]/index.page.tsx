@@ -45,7 +45,8 @@ const OthelloRoom = () => {
   };
 
   const handleGameEnd = () => {
-    const winner = myColor === room.winner ? 'あなた' : '相手';
+    if (room.winner === undefined) return;
+    const winner = convertColorToString(room.winner);
     alert(`${winner}の勝ちです`);
     leaveRoom();
   };
@@ -59,53 +60,73 @@ const OthelloRoom = () => {
   };
 
   const convertColorToString = (color: number) => {
-    return color === 1 ? '黒' : '白';
+    return color === myColor ? 'あなた' : '相手';
+  };
+
+  const convertToBlackOrWhite = (color: number) => {
+    return color === 1 ? '#000' : color === 2 ? '#fff' : '';
+  };
+
+  const countStone = (color: number) => {
+    return room.board.flat().filter((c) => c === color).length;
   };
 
   return (
     <>
       <div className={styles.gameScreen}>
+        <div className={styles.gameInfo}>
+          <div className={styles.playerInfo}>
+            あなた
+            <div
+              className={styles.stone}
+              style={{
+                background: convertToBlackOrWhite(myColor),
+                color: convertToBlackOrWhite(2 / myColor),
+              }}
+            >
+              {countStone(myColor)}
+            </div>
+          </div>
+
+          {room.status === 'waiting' ? (
+            <p>対戦相手を待っています</p>
+          ) : (
+            <p>{convertColorToString(room.currentTurn)}のターン</p>
+          )}
+          <div className={styles.playerInfo}>
+            相手
+            <div
+              className={styles.stone}
+              style={{
+                background: convertToBlackOrWhite(2 / myColor),
+                color: convertToBlackOrWhite(myColor),
+              }}
+            >
+              {countStone(2 / myColor)}
+            </div>
+          </div>
+        </div>
+        <div className={styles.boardContainer}>
+          <div className={styles.board}>
+            {placeableMatrix.map((row, y) =>
+              row.map((color, x) => (
+                <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
+                  {color !== 0 && (
+                    <div
+                      className={`${defineCellStyle(color)}`}
+                      style={{
+                        background: convertToBlackOrWhite(color),
+                      }}
+                    />
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
         <button onClick={leaveRoom} className={styles.leaveButton}>
           部屋を出る
         </button>
-        {room.status === 'waiting' ? (
-          <p>対戦相手を待っています</p>
-        ) : (
-          <p>現在は{convertColorToString(room.currentTurn)}のターン</p>
-        )}
-        <div className={styles.gameInfo}>
-          <div className={`${styles.playerInfo} ${styles.playerSelf} ${styles.playerLeft}`}>
-            あなたは{convertColorToString(myColor)}です
-          </div>
-          <div className={styles.boardContainer}>
-            <div className={styles.board}>
-              {placeableMatrix.map((row, y) =>
-                row.map((color, x) => (
-                  <div className={styles.cell} key={`${x}-${y}`} onClick={() => clickCell(x, y)}>
-                    {color !== 0 && (
-                      <div
-                        className={`${defineCellStyle(color)}`}
-                        style={{
-                          background: color === 1 ? '#000' : color === 2 ? '#fff' : '',
-                        }}
-                      />
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-          {room.userOnRooms
-            .filter((userOnRoom) => userOnRoom.out === null && userOnRoom.firebaseId !== user.id)
-            .map((userOnRoom) => (
-              <div
-                key={userOnRoom.firebaseId}
-                className={`${styles.playerInfo} ${styles.playerOpponent} ${styles.playerRight}`}
-              >
-                相手は{convertColorToString(judgeColor(userOnRoom.firebaseId, room))}です
-              </div>
-            ))}
-        </div>
       </div>
     </>
   );
