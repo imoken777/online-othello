@@ -26,7 +26,6 @@ const Home = () => {
   const createRoom = async () => {
     const res = await apiClient.rooms.$post().catch(returnNull);
     if (!res) return;
-    setRooms([...rooms, res]);
 
     router.push(`/${res.id}`);
   };
@@ -34,7 +33,6 @@ const Home = () => {
   const enterTheRoom = async (roomId: RoomId) => {
     const res = await apiClient.rooms.$patch({ body: { roomId } }).catch(returnNull);
     if (res === null) return;
-    setRooms([...rooms, res]);
 
     router.push(`/${res.id}`);
   };
@@ -46,7 +44,10 @@ const Home = () => {
 
       const activeRoom = allRooms.find((room) =>
         room.userOnRooms.some(
-          (userOnRoom) => userOnRoom.firebaseId === user.id && userOnRoom.out === null
+          (userOnRoom) =>
+            userOnRoom.firebaseId === user.id &&
+            userOnRoom.out === null &&
+            userOnRoom.in < Date.now() - 10000
         )
       );
 
@@ -73,7 +74,7 @@ const Home = () => {
   return (
     <>
       <BasicHeader user={user} />
-      <div className={styles.roomListContainer}>
+      <div className={styles.container}>
         <h1 className={styles.roomListTitle}>部屋一覧</h1>
         <ul className={styles.roomList}>
           {rooms.length === 0 ? (
