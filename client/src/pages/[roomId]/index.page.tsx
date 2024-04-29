@@ -52,11 +52,15 @@ const OthelloRoom = () => {
   };
 
   const defineCellStyle = (color: number) => {
-    return color === -1
-      ? room.currentTurn === myColor
-        ? `${styles.stone} ${styles.placeable}`
-        : ''
-      : styles.stone;
+    if (color === -1) {
+      if (room.currentTurn === myColor) {
+        return `${styles.stone} ${styles.placeable}`;
+      } else {
+        return '';
+      }
+    } else {
+      return styles.stone;
+    }
   };
 
   return (
